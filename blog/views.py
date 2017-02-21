@@ -47,5 +47,22 @@ def add_entry_post():
 
 @app.route("/entry/<int:id>", methods = ["GET"])
 def view_entry(id):
-    entry = session.query(Entry).filter_by(id=id)
+    entry = session.query(Entry).get(id)
     return render_template("single_entry.html", entry=entry)
+
+@app.route("/entry/<int:id>/edit", methods=["POST"])
+def edit_entry():
+    entry = Entry(
+        title=request.form["title"],
+        content=request.form["content"],
+    )
+    session.edit(entry)
+    session.commit()
+    return redirect(url_for("entries"))
+
+@app.route("/entry/<int:id>/delete", methods=["GET"])
+def delete_entry():
+    entry = session.query(Entry).get(id)
+    session.delete(entry)
+    session.commit()
+    return redirect(url_for("entries"))
