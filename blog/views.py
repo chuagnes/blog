@@ -1,6 +1,9 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
+from flask.ext.login import login_user, login_required
+from werkzeug.security import check_password_hash
 from . import app
-from .database import session, Entry
+from .database import session, Entry, User
+
 
 PAGINATE_BY = 10
 
@@ -11,11 +14,11 @@ def entries(page=1):
     page_index = page - 1
 
     count = session.query(Entry).count()
+    paginate_by = int(request.args.get('entries_per', PAGINATE_BY))
+    start = page_index * paginate_by
+    end = start + paginate_by
 
-    start = page_index * PAGINATE_BY
-    end = start + PAGINATE_BY
-
-    total_pages = (count - 1) // PAGINATE_BY + 1
+    total_pages = (count - 1) // paginate_by + 1
     has_next = page_index < total_pages - 1
     has_prev = page_index > 0
 
@@ -32,10 +35,12 @@ def entries(page=1):
     )
 
 @app.route("/entry/add", methods=["GET"])
+@login_required
 def add_entry_get():
     return render_template("add_entry.html")
 
 @app.route("/entry/add", methods=["POST"])
+@login_required
 def add_entry_post():
     entry = Entry(
         title=request.form["title"],
@@ -50,19 +55,39 @@ def view_entry(id):
     entry = session.query(Entry).get(id)
     return render_template("single_entry.html", entry=entry)
 
+@app.route("/entry/<int:id>/edit", methods=["GET"])
+def edit_entry(id):
+    entry = session.query(Entry).filter_by(id=id).first()
+    return render_template("edit_entry.html", entry=entry, title=entry.title, content=entry.content)
+
 @app.route("/entry/<int:id>/edit", methods=["POST"])
-def edit_entry():
-    entry = Entry(
-        title=request.form["title"],
-        content=request.form["content"],
-    )
-    session.edit(entry)
+def edit_entry_post(id):
+    entry = session.query(Entry).filter_by(id=id).first()
+    entry.title = request.form["title"]
+    entry.content = request.form["content"]
+    session.add(entry)
     session.commit()
     return redirect(url_for("entries"))
 
 @app.route("/entry/<int:id>/delete", methods=["GET"])
-def delete_entry():
+def delete_entry(id):
     entry = session.query(Entry).get(id)
     session.delete(entry)
     session.commit()
     return redirect(url_for("entries"))
+
+@app.route("/login", methods=["GET"])
+def login_get():
+    return render_template("login.html")
+
+@app.route("/login", methods=["POST"])
+def login_post():
+    email = request.form["email"]
+    password = request.form["password"]
+    user = session.query(User).filter_by(email=email).first()
+    if not user or not check_password_hash(user.password, password):
+        flash("Incorrect username or password", "danger")
+        return redirect(url_for("login_get"))
+    
+    login_user(user)
+    return redirect(request.args.get('next') or url_for("entries"))
