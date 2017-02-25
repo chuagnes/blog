@@ -6,10 +6,14 @@
                 {{ entry.datetime | dateformat("%d/%m/%y") }}
             </li>
         </ul>
+        
+        <a href="/entry/{{entry.id}}/edit" title="Click to edit post">Edit Post</a><br>
+        <a href="/entry/{{entry.id}}/delete" title="Click to delete post">Delete Post</a>
+        
     </div>
     <div class="col-md-10">
         <h1>
-            {{ entry.title }}
+            <a href="{{url_for('view_entry', id=entry.id)}}"> {{ entry.title }} </a>
         </h1>
         {{ entry.content | markdown }}
     </div>
