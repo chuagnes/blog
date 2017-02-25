@@ -12,9 +12,12 @@ def entries(page=1):
     page_index = page - 1
 
     count = session.query(Entry).count()
+    
+    #set pagination to the dropdown options on entries.html
+    paginate_by = int(request.args.get('entries_per', PAGINATE_BY))
 
-    start = page_index * PAGINATE_BY
-    end = start + PAGINATE_BY
+    start = page_index * paginate_by
+    end = start + paginate_by
 
     total_pages = (count - 1) // PAGINATE_BY + 1
     has_next = page_index < total_pages - 1
@@ -46,7 +49,7 @@ def add_entry_post():
     session.commit()
     return redirect(url_for("entries"))
 
-@app.route("/entry/<int:id>")
+@app.route("/entry/<id>")
 def view_entry(id):
     entry = session.query(Entry).get(id)
     return render_template("single_entry.html", entry=entry)
@@ -58,9 +61,21 @@ def edit_entry_get(id):
 
 @app.route("/entry/<id>/edit", methods=["POST"])
 def edit_entry_post(id):
-    entry = session.query(Entry).filter_by(id=id).first()
+    entry = session.query(Entry).get(id)
     entry.title = request.form["title"]
     entry.content = request.form["content"]
     session.add(entry)
+    session.commit()
+    return redirect(url_for("entries"))
+
+@app.route("/entry/<id>/delete", methods=["GET"])
+def delete_entry_get(id):
+    entry = session.query(Entry).filter_by(id=id).first()
+    return render_template("delete_entry.html", entry=entry, title=entry.title, content=entry.content)
+
+@app.route("/entry/<id>/delete", methods=["POST"])
+def delete_entry_post(id):
+    entry = session.query(Entry).filter_by(id=id).first()
+    session.delete(entry)
     session.commit()
     return redirect(url_for("entries"))

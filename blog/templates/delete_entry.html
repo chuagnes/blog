@@ -2,8 +2,17 @@
 
 {% block content %}
 <h1>
-    Edit Entry
+    Delete Entry
 </h1>
+
+<p>
+    <form role="form" method="POST">
+    <button type="submit" class="btn btn-success">Confirm Delete</button>
+    <a href="/" class="btn btn-danger">Cancel</a>
+    </form>
+    
+
+</p>
 
 <form role="form" method="POST">
     <div class="form-group">
@@ -14,6 +23,5 @@
         <label for="content">Content</label>
         <textarea class="form-control" id="content" name="content" rows="20" required> {{content | safe}} </textarea>
     </div>
-    <button type="submit" class="btn btn-default">Submit</button>
 </form>
 {% endblock %}
