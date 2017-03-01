@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>
+    Delete Entry
+</h1>
+
+<p>
+    <form role="form" method="POST">
+    <button type="submit" class="btn btn-success">Confirm Delete</button>
+    <a href="/" class="btn btn-danger">Cancel</a>
+    </form>
+    
+
+</p>
+
+<form role="form" method="POST">
+    <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" class="form-control" id="title" name="title" value="{{entry.title}}" required>
+    </div>
+    <div class="form-group">
+        <label for="content">Content</label>
+        <textarea class="form-control" id="content" name="content" rows="20" required> {{content | safe}} </textarea>
+    </div>
+</form>
+{% endblock %}
