@@ -32,6 +32,19 @@
                     </button>
                     <a class="navbar-brand" href="{{ url_for('entries') }}">Blogful</a>
                 </div>
+                
+                    <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.name %}
+                    <p class="navbar-text"> {{current_user.name}} </p>
+                    <li>
+                    <a href="/logout"><span class="glyphicon glyphicon-log-out"></span>Logout </a>
+                    </li>
+                    {% else %}
+                    <li>
+                    <a href="{{ url_for('login_get') }}"><span class="glyphicon glyphicon-user"></span> Login </a>
+                    </li></ul>
+                    {% endif %}
+                
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
                     </ul>

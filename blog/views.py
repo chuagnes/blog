@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash
-from flask.ext.login import login_user, login_required
+from flask.ext.login import login_user, login_required, current_user, logout_user
 from werkzeug.security import check_password_hash
 from . import app
 from .database import session, Entry, User
@@ -47,6 +47,7 @@ def add_entry_post():
     entry = Entry(
         title=request.form["title"],
         content=request.form["content"],
+        author=current_user
     )
     session.add(entry)
     session.commit()
@@ -99,3 +100,8 @@ def login_post():
 
     login_user(user)
     return redirect(request.args.get('next') or url_for("entries"))
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("login_get"))
